@@ -1,0 +1,86 @@
+
+digraph g {
+        graph [
+	    rankdir = "LR"
+	];
+	node [
+	    fontsize = "12"
+	    fontname = "Courier"
+	    shape = "ellipse"
+	];
+	edge[];
+	"client" [
+        label="client | Total Classes: 9"
+	shape="record"
+	color=".99 0 .9"
+	style=filled
+    ];
+    "client" -> "database"
+    "client" -> "java.awt"
+    "client" -> "java.awt.event"
+    "client" -> "java.lang"
+    "client" -> "java.sql"
+    "client" -> "java.time"
+    "client" -> "java.time.format"
+    "client" -> "javax.swing"
+    "client" -> "javax.swing.table"
+    "database" [
+        label="database | Total Classes: 2"
+	shape="record"
+	color=".99 0.2 .9"
+	style=filled
+    ];
+    "database" -> "java.lang"
+    "database" -> "java.sql"
+    "database" -> "java.time"
+    "database" -> "java.time.format"
+    "java.awt" [
+        label="java.awt | Total Classes: "
+	shape="record"
+	color=".99 0.0 .9"
+	style=filled
+    ];
+    "java.awt.event" [
+        label="java.awt.event | Total Classes: "
+	shape="record"
+	color=".99 0.0 .9"
+	style=filled
+    ];
+    "java.lang" [
+        label="java.lang | Total Classes: "
+	shape="record"
+	color=".99 0.0 .9"
+	style=filled
+    ];
+    "java.sql" [
+        label="java.sql | Total Classes: "
+	shape="record"
+	color=".99 0.0 .9"
+	style=filled
+    ];
+    "java.time" [
+        label="java.time | Total Classes: "
+	shape="record"
+	color=".99 0.0 .9"
+	style=filled
+    ];
+    "java.time.format" [
+        label="java.time.format | Total Classes: "
+	shape="record"
+	color=".99 0.0 .9"
+	style=filled
+    ];
+    "javax.swing" [
+        label="javax.swing | Total Classes: "
+	shape="record"
+	color=".99 0.0 .9"
+	style=filled
+    ];
+    "javax.swing.table" [
+        label="javax.swing.table | Total Classes: "
+	shape="record"
+	color=".99 0.0 .9"
+	style=filled
+    ];
+    
+}
