@@ -1,0 +1,40 @@
+name: (Backends) Pull Request
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref_name || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  qodana:
+    name: Qodana
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Qodana Scan
+        uses: JetBrains/qodana-action@v2024.3
+        with:
+          artifact-name: qodana-test-backends
+          cache-dir: qodana-test-backends/.cache/qodana
+          primary-cache-key: |
+            qodana-test-backends-${{ runner.os }}-${{ hashFiles('pom.xml') }}
+          additional-cache-key: qodana-test-backends-${{ runner.os }}
+          upload-result: true
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TEST_JAVA }}

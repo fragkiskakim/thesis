@@ -1,0 +1,75 @@
+name: (Frontend a) Pull Request
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref_name || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  qodana:
+    name: Qodana
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            frontend-a/**
+            .github/workflows/frontend-a-pull-request.yml
+          use_rest_api: true
+
+      - run: |
+          echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
+
+      - name: Job skipped
+        if: steps.changed-files.outputs.any_changed == 'false'
+        run: echo "No changes detected. Skipping job."
+
+      - name: Checkout code
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Setup Node
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: actions/setup-node@v4
+        with:
+          cache: "npm"
+          cache-dependency-path: frontend-a/package-lock.json
+          node-version-file: ".node-version"
+
+      - name: Install dependencies
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: npm ci --ignore-scripts
+        shell: bash
+        working-directory: frontend-a
+
+      - name: Qodana Scan
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: JetBrains/qodana-action@v2024.3
+        with:
+          args: |
+            --source-directory,frontend-a,
+            --linter,jetbrains/qodana-js:2024.3,
+            --config,frontend-a/qodana-pull-request.yaml,
+            --fail-threshold,0
+          artifact-name: qodana-test
+          cache-dir: qodana-test-frontend-a/.cache/qodana
+          primary-cache-key: |
+            qodana-test-frontend-a-${{ runner.os }}-${{ github.run_id }}-
+              ${{ hashFiles('frontend-a/qodana-pull-request.yaml') }}
+          additional-cache-key: qodana-test-frontend-a-${{ runner.os }}
+          upload-result: true
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TEST }}

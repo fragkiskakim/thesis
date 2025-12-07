@@ -1,0 +1,52 @@
+name: (Frontend a) Push main
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "frontend-a/**"
+      - ".github/workflows/frontend-a-push-main.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref && github.ref_name || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  qodana:
+    name: Qodana
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      checks: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: "npm"
+          cache-dependency-path: frontend-a/package-lock.json
+          node-version-file: ".node-version"
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+        shell: bash
+        working-directory: frontend-a
+
+      - name: Qodana Scan
+        uses: JetBrains/qodana-action@v2024.3
+        with:
+          args: |
+            --project-dir,frontend-a,
+            --config,qodana-push-main.yaml,
+            --fail-threshold,0
+          artifact-name: qodana-test
+          cache-dir: qodana-test-frontend-a/.cache/qodana
+          primary-cache-key: |
+            qodana-test-frontend-a-${{ runner.os }}-${{ github.run_id }}-
+              ${{ hashFiles('qodana-push-main.yaml') }}
+          additional-cache-key: qodana-test-frontend-a-${{ runner.os }}
+          upload-result: true
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TEST }}
