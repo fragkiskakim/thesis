@@ -8,5 +8,3 @@ profile:
   name: qodana.recommended
 include:
   - name: CheckDependencyLicenses
-projectDir: crudApplication0
-resultsDir: .qodana/results
